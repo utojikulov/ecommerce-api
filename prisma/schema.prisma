@@ -41,3 +41,11 @@ model Adress {
 
     @@map("adress")
 }
+
+model Categories {
+    id String @id @default(uuid())
+    name String
+    description String?
+
+    createdAt DateTime @default(now()) @map("created_at")
+}
