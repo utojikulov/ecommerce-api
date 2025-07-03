@@ -6,8 +6,8 @@ import { AuthDto } from './dto/auth.dto'
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
-	@Post('login')
-	async login(@Body() dto: AuthDto, @Response({ passthrough: true }) res) {
-		return await this.authService.login(dto, res)
-	}
+	// @Post('login')
+	// async login(@Body() dto: AuthDto, @Response({ passthrough: true }) res) {
+	// 	return await this.authService.login(dto, res)
+	// }
 }
