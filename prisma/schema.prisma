@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output = "./generated"
 }
 
 datasource db {
@@ -12,6 +13,8 @@ model User {
     name String @map("name")
     email String @unique
     password String
+
+    role UserRole @default(CLIENT)
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
@@ -48,3 +51,15 @@ model Categories {
 
     createdAt DateTime @default(now()) @map("created_at")
 }
+
+// enum UserRole {
+//    CLIENT
+//    SELLER
+//    ADMIN
+// }
+
+// enum AuthMethod {
+//    CREDENTIALS
+//    GOOGLE
+//    GITHUB
+// }

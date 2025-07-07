@@ -10,6 +10,8 @@ import { verify } from 'argon2'
 
 @Injectable()
 export class AuthService {
+	REFRESH_TOKEN_EXPIRATION = 1
+	REFRESH_TOKEN_NAME = 'refreshToken'
 	constructor(
 		private userService: UserService,
 		private jwt: JwtService
@@ -25,6 +27,8 @@ export class AuthService {
 			...tokens
 		}
 	}
+
+	async register() {}
 
 	async validateUser(dto: AuthDto) {
 		const user = await this.userService.getByEmail(dto.email)
@@ -50,5 +54,10 @@ export class AuthService {
 		})
 
 		return { accessToken, refreshToken }
+	}
+
+	addRefreshTokenToResponse(res: Response, refreshToken: string) {
+		const expiresIn = new Date()
+		expiresIn.setDate(expiresIn.getDate() + this.REFRESH_TOKEN_EXPIRATION)
 	}
 }
