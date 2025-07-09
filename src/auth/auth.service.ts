@@ -28,19 +28,8 @@ export class AuthService {
 		}
 	}
 
-	async register() {}
-
-	async validateUser(dto: AuthDto) {
-		const user = await this.userService.getByEmail(dto.email)
-
-		if (!user) throw new NotFoundException('User not found')
-
-		const isValid = await verify(dto.email, dto.password)
-
-		if (!isValid) throw new UnauthorizedException('Invalid password.')
-
-		return user
-	}
+	// async register() {}
+	// async getNewTokens() {}
 
 	private issueTokens(userId: string) {
 		const data = { id: userId }
@@ -56,8 +45,22 @@ export class AuthService {
 		return { accessToken, refreshToken }
 	}
 
-	addRefreshTokenToResponse(res: Response, refreshToken: string) {
-		const expiresIn = new Date()
-		expiresIn.setDate(expiresIn.getDate() + this.REFRESH_TOKEN_EXPIRATION)
+	async validateUser(dto: AuthDto) {
+		const user = await this.userService.getByEmail(dto.email)
+
+		if (!user) throw new NotFoundException('User not found')
+
+		const isValid = await verify(dto.email, dto.password)
+
+		if (!isValid) throw new UnauthorizedException('Invalid password.')
+
+		return user
 	}
+
+	// addRefreshTokenToResponse(res: Response, refreshToken: string) {
+	// 	const expiresIn = new Date()
+	// 	expiresIn.setDate(expiresIn.getDate() + this.REFRESH_TOKEN_EXPIRATION)
+	// }
+	//
+	// removeRefreshTokenFromResponse() {}
 }

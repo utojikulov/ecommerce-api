@@ -15,11 +15,15 @@ export class AuthController {
 		return await this.authService.login(dto)
 	}
 
-	@Post('register')
-	async register(
-		@Body() dto: AuthDto,
-		@Res({ passthrough: true }) res: Response
-	) {
-		// return await this.authService.register(dto)
-	}
+	// @Post('register')
+	// async register(
+	// 	@Body() dto: AuthDto,
+	// 	@Res({ passthrough: true }) res: Response
+	// ) {
+	// 	return await this.authService.register()
+	// }
+
+	// 'login/access-token'
+	//
+	// 'logout'
 }
