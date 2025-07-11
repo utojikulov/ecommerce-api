@@ -1,4 +1,5 @@
 import {
+	BadRequestException,
 	Injectable,
 	NotFoundException,
 	UnauthorizedException
@@ -7,6 +8,7 @@ import { UserService } from 'src/user/user.service'
 import { JwtService } from '@nestjs/jwt'
 import { AuthDto } from './dto/auth.dto'
 import { verify } from 'argon2'
+import { Response } from 'express'
 
 @Injectable()
 export class AuthService {
@@ -28,8 +30,31 @@ export class AuthService {
 		}
 	}
 
-	// async register() {}
-	// async getNewTokens() {}
+	async register(dto: AuthDto) {
+		const oldUser = await this.userService.getByEmail(dto.email)
+		if (!oldUser) throw new BadRequestException('User already exists.')
+
+		const { password, ...user } = await this.userService.create(dto)
+		const tokens = this.issueTokens(user.id)
+
+		return {
+			user,
+			...tokens
+		}
+	}
+
+	async getNewTokens(refreshToken: string) {
+		const result = await this.jwt.verifyAsync(refreshToken)
+		if (!result) throw new UnauthorizedException('Invalid refresh token.')
+
+		const { ...user } = await this.userService.getById(result.id)
+		const tokens = this.issueTokens(user.id)
+
+		return {
+			user,
+			...tokens
+		}
+	}
 
 	private issueTokens(userId: string) {
 		const data = { id: userId }
@@ -57,10 +82,26 @@ export class AuthService {
 		return user
 	}
 
-	// addRefreshTokenToResponse(res: Response, refreshToken: string) {
-	// 	const expiresIn = new Date()
-	// 	expiresIn.setDate(expiresIn.getDate() + this.REFRESH_TOKEN_EXPIRATION)
-	// }
-	//
-	// removeRefreshTokenFromResponse() {}
+	addRefreshTokenToResponse(res: Response, refreshToken: string) {
+		const expiresIn = new Date()
+		expiresIn.setDate(expiresIn.getDate() + this.REFRESH_TOKEN_EXPIRATION)
+
+		res.cookie(this.REFRESH_TOKEN_NAME, refreshToken, {
+			httpOnly: true,
+			domain: 'localhost',
+			expires: expiresIn,
+			secure: true,
+			sameSite: 'none'
+		})
+	}
+
+	removeRefreshTokenFromResponse(res: Response) {
+		res.cookie(this.REFRESH_TOKEN_NAME, '', {
+			httpOnly: true,
+			domain: 'localhost',
+			expires: new Date(0),
+			secure: true,
+			sameSite: 'none'
+		})
+	}
 }
