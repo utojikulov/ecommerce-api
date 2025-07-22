@@ -1,4 +1,11 @@
-import { Body, Controller, Post, Res } from '@nestjs/common'
+import {
+	Body,
+	Controller,
+	Post,
+	Res,
+	UsePipes,
+	ValidationPipe
+} from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { AuthDto } from './dto/auth.dto'
 import { Response } from 'express'
@@ -12,18 +19,31 @@ export class AuthController {
 		@Body() dto: AuthDto,
 		@Res({ passthrough: true }) res: Response
 	) {
-		return await this.authService.login(dto)
+		const { refreshToken, ...response } = await this.authService.login(dto)
+		this.authService.addRefreshTokenToResponse(res, refreshToken)
+
+		return response
 	}
 
-	// @Post('register')
-	// async register(
-	// 	@Body() dto: AuthDto,
-	// 	@Res({ passthrough: true }) res: Response
-	// ) {
-	// 	return await this.authService.register()
-	// }
+	@UsePipes(new ValidationPipe())
+	@Post('register')
+	async register(
+		@Body() dto: AuthDto,
+		@Res({ passthrough: true }) res: Response
+	) {
+		const { refreshToken, ...response } =
+			await this.authService.register(dto)
+		this.authService.addRefreshTokenToResponse(res, refreshToken)
+
+		return response
+	}
 
 	// 'login/access-token'
-	//
-	// 'logout'
+
+	@Post('logout')
+    async logout(@Res({ passthrough: true }) res: Response) {
+    await this.authService.removeRefreshTokenFromResponse(res)
+
+    return true 
+  }
 }

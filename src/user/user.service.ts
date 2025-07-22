@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { hash } from 'argon2'
 import { AuthDto } from 'src/auth/dto/auth.dto'
 import { PrismaService } from 'src/prisma.service'
+
 
 @Injectable()
 export class UserService {
@@ -33,4 +34,24 @@ export class UserService {
 			data: user
 		})
 	}
+
+  async update(id: string, dto: AuthDto) {
+    const data = dto
+    if (!dto) throw new BadRequestException('nothing was provided to upate')
+
+    if (dto.password) {
+      data = { ...dto, password: await hash(dto.password)}
+    } 
+
+    return this.prisma.user.update({
+      where: {
+        id
+      },
+      data,
+      select: {
+        email: true,
+        name: true
+      }
+    })
+  }
 }
